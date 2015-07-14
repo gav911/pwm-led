@@ -1,0 +1,33 @@
+#!/bin/sh
+
+FILENAME='PPM_LED'
+MCU='attiny13'
+OPTIMIZATION='s'
+
+LFUSE='0x79'
+HFUSE='0xFF'
+LOCKB='0x00'
+
+
+
+source ~/avr/__compiler_release $1
+
+
+if [ "$1" == "" ]
+then
+	avr-gcc -c -mmcu=${MCU} -I. -O${OPTIMIZATION} \
+		-o tmp/PPM_LED.o PPM_LED.c
+
+	avr-gcc -mmcu=${MCU} -I. -O${OPTIMIZATION} \
+		tmp/PPM_LED.o --output tmp/${FILENAME}.elf
+
+	avr-objcopy -O ihex -R .eeprom -R .fuse -R .lock tmp/${FILENAME}.elf ${FILENAME}.hex
+
+	avr-objdump -S tmp/${FILENAME}.elf > tmp/${FILENAME}.S
+
+	avr-size -B ${FILENAME}.hex
+
+	echo ${FILENAME} compiled
+
+fi
+
